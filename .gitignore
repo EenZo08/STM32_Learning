@@ -1,0 +1,49 @@
+# CMSIS 缓存
+.cmsis/
+
+# EIDE 插件配置
+.eide/
+
+# VS Code 个人配置
+.vscode/
+
+# 调试配置
+DebugConfig/
+
+# 编译输出
+Listings/
+Objects/
+
+# Keil 用户缓存文件
+*.uvgui.*
+*.uvoptx
+*.Administrator
+*.uvguix.*
+
+# Keil 编译中间文件
+*.o
+*.d
+*.crf
+*.htm
+*.dep
+*.axf
+*.hex
+*.lst
+*.lnp
+*.plg
+*.iex
+*.fet
+*.asm
+*.map
+
+# VS Code 工作区文件
+*.code-workspace
+
+# 备份文件
+*.bak
+*.orig
+
+.clang-format
+.clang
+
+build/
