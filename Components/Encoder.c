@@ -26,10 +26,9 @@ void Encoder_Init()
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource0);
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource1);
 
-
     // EXTI初始化
     EXTI_InitTypeDef EXTI_InitStructure;
-    EXTI_InitStructure.EXTI_Line =  EXTI_Line0 | EXTI_Line1;
+    EXTI_InitStructure.EXTI_Line = EXTI_Line0 | EXTI_Line1;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling; // Rising上升沿触发   Falling下降沿触发
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
@@ -37,7 +36,6 @@ void Encoder_Init()
 
     // 中断分组
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
 
     NVIC_InitTypeDef NVIC_InitStructure;                      // 定义结构体变量
     NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;          // 选择配置NVIC的EXTI0线
@@ -64,22 +62,6 @@ uint16_t Encoder_Get(void)
     return tem;
 }
 
-void EXTI0_IRQHandler(void)
-{
-    if (EXTI_GetITStatus(EXTI_Line0) != RESET) // 判断是否是p14触发中断
-    {
-        if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1) == 0) // 判断引脚电平变化   避免抖动带来影响
-        {
-            Encoder_Value--;
-        }
-
-        // 清除外部中断0号线的中断标志位
-        // 中断标志位必须清除
-        // 否则中断将连续不断地触发，导致主程序卡死
-        EXTI_ClearITPendingBit(EXTI_Line0);
-    }
-}
-
 /**
  * @brief  EIXT中断函数
  * @param  参数名  参数说明
@@ -91,10 +73,31 @@ void EXTI1_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line1) != RESET) // 判断是否是p14触发中断
     {
-        if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0) == 0) // 判断引脚电平变化   避免抖动带来影响
+        if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1) == 0) // A     当a沿边是低电平时    b沿边也是低电平就是顺时针ning
         {
-            Encoder_Value++;
+            if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0) == 0) // 判断引脚电平变化   避免抖动带来影响
+            {
+                Encoder_Value++;
+            }
         }
+
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
+}
+
+void EXTI0_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line0) != RESET) // 判断是否是p14触发中断
+    {
+
+            if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1) == 0) // 判断引脚电平变化   避免抖动带来影响
+            {
+                Encoder_Value--;
+            }
+    }
+
+    // 清除外部中断0号线的中断标志位
+    // 中断标志位必须清除
+    // 否则中断将连续不断地触发，导致主程序卡死
+    EXTI_ClearITPendingBit(EXTI_Line0);
 }

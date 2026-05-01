@@ -6,7 +6,7 @@
 // 对射式红外感应测试
 
 uint16_t count = 0;
-// 按键控制LED
+
 int main(void)
 {
 
