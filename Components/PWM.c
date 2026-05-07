@@ -69,8 +69,9 @@ void PWM_SetPeriod(uint16_t arr, uint16_t psc)
 {
 
     TIM_SetAutoreload(TIM2, arr);
-    TIM2->PSC = psc;                                 // 直接写寄存器
-    TIM_GenerateEvent(TIM2, TIM_EventSource_Update); // 手动生成更新事件，让 PSC 立即生效
+    TIM_PrescalerConfig(TIM2, psc, TIM_PSCReloadMode_Immediate);
+    // TIM2->PSC = psc;                                 // 直接写寄存器
+    // TIM_GenerateEvent(TIM2, TIM_EventSource_Update); // 手动生成更新事件，让 PSC 立即生效
 
     TIM_SetCompare3(TIM2, 0); // 防止切换时误输出
 }

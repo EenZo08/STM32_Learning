@@ -69,6 +69,7 @@ void PWM1_SetCompare(uint16_t CompareValue)
 // {
 
 //     TIM_SetAutoreload(TIM2, arr);
+//     TIM_PrescalerConfig(TIM2, psc, TIM_PSCReloadMode_Immediate);
 //     TIM2->PSC = psc;                                 // 直接写寄存器
 //     TIM_GenerateEvent(TIM2, TIM_EventSource_Update); // 手动生成更新事件，让 PSC 立即生效
 

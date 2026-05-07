@@ -1,55 +1,42 @@
-#include "Key.h"
-#include "Motor.h"
 #include "OLED.h"
+#include "serial.h"
 #include "stm32f10x.h"
 
-int8_t speed = 0;
-int8_t speed1 = 0;
+uint8_t RXData;
+// uint8_t Serial_RXFlag;
 
+// USART 串口单片机接收数据   1、只查询 只读  2、设置中断   使用接收数据
 int main(void)
 {
-    Motor1_Init();
-    Motor2_Init();
-    // OLED_Init();
-    Key_Init();
-    OLED_ShowString(1, 1, "SPEED:");
+    Serial_Init();
+    OLED_Init();
     while (1)
     {
-        if (Key_GetKeyNum(1) == 1)
+        //  1、只查询 只读
+        // if (USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == SET)
+        // {
+        //     RXData = USART_ReceiveData(USART1);
+        //     // Serial_RXFlag = 1;
+        //     USART_ClearFlag(USART1, USART_FLAG_RXNE);
+        //     Serial_SendByte(RXData);
+        // }
+
+       
+
+        // 2、设置中断   使用接收数据
+        if (Serial_GetRXFlag() == 1)
         {
-            speed += 20;
-            if (speed > 100)
-            {
-                speed = -100;
-            }
+            RXData = Serial_GetRXData();
+            Serial_SendByte(RXData);
         }
+        // 发送数据
+        // Serial_SendByte('A');
+        // delay_ms(1000);
+        // Serial_SendByte('B');
+        // delay_ms(1000);
+        // Serial_SendByte('C');
+        // delay_ms(1000);
 
-
-
-        if (Key_GetKeyNum(11) == 1){
-            speed1 += 20;
-            if (speed1 > 100)
-            {
-                speed1 = 0;
-            }
-        }
-
-        Motor1_SetSpeed(speed);
-        Motor2_SetSpeed(speed1);
-
-        // OLED_ShowSignedNum(2, 1, speed, 5);
+         OLED_ShowHexNum(1, 1, RXData, 2);
     }
 }
-
-
-
-
-
-// int main()
-// {
-//     OLED_Init();
-//     OLED_ShowString(1, 1, "SPEED:");
-//     while (1)
-//     {
-//     }
-// }
