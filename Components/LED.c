@@ -32,7 +32,7 @@ void LED_Init()
 
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;//GPIO_Pin_All;
 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; // pp推挽   od开漏
 
@@ -42,7 +42,7 @@ void LED_Init()
 
     //  GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
 
-    // GPIO_ResetBits(GPIOC, GPIO_Pin_13);
+    GPIO_SetBits(GPIOA, GPIO_Pin_0);
 }
 
 /**

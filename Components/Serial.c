@@ -1,9 +1,15 @@
 #include "stm32f10x.h"
 #include <stdarg.h>
 
-uint8_t Serial_RXData; // 接收的数据
-uint8_t Serial_RXFlag; // 接收标志
+uint8_t Serial_TXData[4]; // 发送的数据    发什么在外部填进去   数据包长度自定
 
+// 接收hex格式  进制数文件
+uint8_t Serial_RXData[4]; // 接收的数据     接收长度要与index对应
+
+// 接收文本数据  转字符串
+char Serial_RXStr[100]; // 接收的数据字符串  上限是100x    可能有数据覆盖
+
+uint8_t Serial_RXFlag; // 接收标志
 
 //   发送数据    发送标志位   先到TDR发送数据寄存器    再到发送移位寄存器    通过gpio发     sclk定时只能是输出发送时用 发送特定波 适配
 void Serial_Init(void)
@@ -172,10 +178,24 @@ uint8_t Serial_GetRXFlag(void)
  * @retval 返回值  返回值说明
  * @note   补充
  */
-uint8_t Serial_GetRXData(void)
-{
+// uint8_t Serial_GetRXData(void)
+// {
 
-    return Serial_RXData;
+//     return Serial_RXData;
+// }
+
+/**
+ * @brief  发送数据包
+ * @param  参数名  参数说明
+ * @retval 返回值  返回值说明
+ * @note   FF 数组  FE
+ */
+void Serial_SendPacket(void)
+{
+    Serial_SendByte(0xFF);
+    // Serial_SendByte(0x55);
+    Serial_SendArray(Serial_TXData, 4);
+    Serial_SendByte(0xFE);
 }
 
 /**
@@ -187,10 +207,77 @@ uint8_t Serial_GetRXData(void)
 
 void USART1_IRQHandler(void)
 {
+    static uint8_t RXState = 0; // 定义当前接收数据的状态
+
+    static uint8_t Index = 0; // 定义当前接收数据的位置
+
     if (USART_GetITStatus(USART1, USART_IT_RXNE) == SET)
     {
-        Serial_RXData = USART_ReceiveData(USART1);
-        Serial_RXFlag = 1;
+        uint8_t RXData = USART_ReceiveData(USART1);
+        // Serial_RXFlag = 1;
+
+        // 接收hex数据  FF 数组[4] FE
+        // if (RXState == 0)
+        // { // 等待接收数据
+        //     if (RXData == 0xFF)
+        //     {                // 判断包头
+        //         RXState = 1; // 切换到接收数据状态
+        //         Index = 0;   // 重置当前接收数据的位置
+        //     }
+        // }
+        // else if (RXState == 1)
+        // {
+        //     Serial_RXData[Index] = RXData; // 接收数据
+        //     Index++;
+        //     if (Index >= 4)
+        //     {
+        //         RXState = 2; // 切换到等待接收数据状态
+        //     }
+        // }
+        // else if (RXState == 2)
+        // {
+        //     if (RXData == 0xFE)
+        //     {                      // 判断包尾
+        //         RXState = 0;       // 切换到等待接收数据状态
+
+        //         Serial_RXFlag = 1; // 设置接收标志位
+        //     }
+        // }
+
+        // 接收文本数据  "&" 数组[4] "\r" "\n"
+        if (RXState == 0)
+        { // 等待接收数据
+            if (RXData == '@')
+            {                // 判断包头
+                RXState = 1; // 切换到接收数据状态
+                Index = 0;   // 重置当前接收数据的位置
+            }
+        }
+        else if (RXState == 1)
+        {
+
+            if (RXData == '\r')
+            {
+                RXState = 2; // 切换到等待接收数据状态
+            }
+            else
+            {
+                Serial_RXStr[Index++] = RXData; // 接收数据
+                // Index++;
+            }
+        }
+        else if (RXState == 2)
+        {
+            if (RXData == '\n')
+            {                // 判断包尾
+                RXState = 0; // 切换到等待接收数据状态
+
+                Serial_RXStr[Index] = '\0';
+
+                Serial_RXFlag = 1; // 设置接收标志位
+            }
+        }
+
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);
     }
 }
